@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+(function () {
+  try {
+    var s = localStorage.getItem("dm-labs-theme");
+    document.documentElement.setAttribute("data-theme", s === "dark" ? "dark" : "light");
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+  try {
+    var l = localStorage.getItem("dm-labs-lang");
+    if (l === "en" || l === "pt") document.documentElement.lang = l;
+  } catch (e) {}
+})();
+
+  </script>
+  <title>Pomodoro · Daniel Marcos Labs</title>
+  <meta name="description" content="Temporizador Pomodoro 25/5 no browser. A Daniel Marcos lab." />
+  <style>
+:root {
+  --bg: #F7F8FA;
+  --text: #0F172A;
+  --muted: #64748B;
+  --accent: #0F766E;
+  --accent-hover: #0D9488;
+  --accent-dim: rgba(15, 118, 110, 0.14);
+  --card: #FFFFFF;
+  --line: rgba(15, 23, 42, 0.10);
+  --input: #FFFFFF;
+  --shadow: 0 10px 32px rgba(15, 23, 42, 0.06);
+  --ok: #15803D;
+  --danger: #DC2626;
+  --header-wash: rgba(15, 118, 110, 0.07);
+  --board-empty: #F1F5F9;
+}
+html { color-scheme: light; }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1220;
+  --text: #E8EEF7;
+  --muted: #9AA8BC;
+  --accent: #D4AF37;
+  --accent-hover: #E8C547;
+  --accent-dim: rgba(212, 175, 55, 0.16);
+  --card: #121A2B;
+  --line: rgba(232, 238, 247, 0.08);
+  --input: #0B1220;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --ok: #6FCF97;
+  --danger: #E26D7A;
+  --header-wash: rgba(212, 175, 55, 0.06);
+  --board-empty: #0E1628;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.site-header, .site-footer { padding: 1rem 1.25rem; }
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--header-wash), transparent);
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
+.brand:hover { color: var(--accent); text-decoration: none; }
+.brand span { color: var(--accent); }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--card);
+}
+.lang-toggle button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.35rem 0.65rem;
+  font: 700 0.75rem/1 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.lang-toggle button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+html[data-theme="dark"] .lang-toggle button[aria-pressed="true"] { color: #0B1220; }
+.icon-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.gh-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+}
+.gh-link:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; }
+main { width: min(960px, calc(100% - 2rem)); margin: 1.25rem auto 2rem; flex: 1; }
+h1 { font-size: 1.55rem; margin: 0 0 0.35rem; letter-spacing: -0.02em; }
+.lead { color: var(--muted); margin: 0 0 1.1rem; line-height: 1.5; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.85rem;
+  box-shadow: var(--shadow);
+}
+.btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  padding: 0.55rem 0.95rem;
+}
+.btn:hover { border-color: var(--accent); }
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn-accent:hover { filter: brightness(1.06); }
+html[data-theme="dark"] .btn-accent { color: #0B1220; }
+.btn-ghost { background: transparent; color: var(--text); }
+.btn[aria-pressed="true"] {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.88rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+}
+.muted { color: var(--muted); }
+.ok { color: var(--ok); }
+.danger { color: var(--danger); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+input, select, textarea {
+  font: inherit;
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+  outline: none;
+}
+.row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+@media (max-width: 640px) {
+  .site-header { align-items: flex-start; }
+}
+
+
+    .timer-wrap { text-align: center; padding: 1.2rem 0.5rem 0.5rem; }
+    .ring {
+      width: min(260px, 70vw);
+      height: min(260px, 70vw);
+      margin: 0 auto 1rem;
+      position: relative;
+    }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring .bg { fill: none; stroke: var(--line); stroke-width: 8; }
+    .ring .fg { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.4s linear; }
+    .time {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(2.4rem, 9vw, 3.4rem);
+      font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+    }
+    .phase {
+      font-weight: 600; color: var(--accent); margin: 0 0 1rem;
+      text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem;
+    }
+    .actions { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .meta { text-align: center; color: var(--muted); margin-top: 0.85rem; font-size: 0.9rem; }
+
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="https://danielpro.dev">Daniel Marcos <span>· Labs</span></a>
+    <div class="header-right">
+      <span class="muted" style="font-size:0.85rem" data-i18n="tag"></span>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Modo escuro"></button>
+      <a class="gh-link" href="https://github.com/danielcodemoz/pomodoro-lab">GitHub</a>
+    </div>
+  </header>
+  <main>
+
+    <h1 data-i18n="title">Pomodoro</h1>
+    <p class="lead" data-i18n="lead">Foco 25 minutos, pausa 5. Começa, pausa e recomeça — tudo neste browser.</p>
+    <section class="card timer-wrap">
+      <div class="phase" id="phase"></div>
+      <div class="ring">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="bg" cx="60" cy="60" r="52"></circle>
+          <circle class="fg" id="arc" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="time" id="time">25:00</div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-accent" id="start" data-i18n="start">Começar</button>
+        <button type="button" class="btn" id="pause" data-i18n="pause">Pausa</button>
+        <button type="button" class="btn btn-ghost" id="reset" data-i18n="reset">Repor</button>
+      </div>
+      <p class="meta" id="meta"></p>
+    </section>
+
+  </main>
+  <footer class="site-footer">
+    <span>Daniel Marcos · Labs</span>
+    <span>·</span>
+    <a href="https://danielpro.dev">danielpro.dev</a>
+    <span>·</span>
+    <a href="https://github.com/danielcodemoz/pomodoro-lab" data-i18n="code">Código</a>
+    <span>·</span>
+    <span data-i18n="labnote">Laboratório, não um produto de produção.</span>
+  </footer>
+  <script>
+(function () {
+  var KEY = "dm-labs-theme";
+  var btn = document.getElementById("theme-toggle");
+  var SUN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/></svg>';
+  function isDark() { return document.documentElement.getAttribute("data-theme") === "dark"; }
+  function paint() {
+    if (!btn) return;
+    btn.innerHTML = isDark() ? SUN : MOON;
+    var en = (document.documentElement.lang || "pt") === "en";
+    btn.setAttribute("aria-label", isDark() ? (en ? "Light mode" : "Modo claro") : (en ? "Dark mode" : "Modo escuro"));
+  }
+  window.__dmPaintTheme = paint;
+  paint();
+  if (btn) btn.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    paint();
+  });
+})();
+
+function dmGetLang() {
+  try {
+    var l = localStorage.getItem("dm-labs-lang");
+    if (l === "en" || l === "pt") return l;
+  } catch (e) {}
+  return "pt";
+}
+function dmSetLang(l) {
+  try { localStorage.setItem("dm-labs-lang", l); } catch (e) {}
+  document.documentElement.lang = l;
+  document.querySelectorAll(".lang-toggle button").forEach(function (b) {
+    b.setAttribute("aria-pressed", b.getAttribute("data-lang") === l ? "true" : "false");
+  });
+  var dict = (window.I18N && window.I18N[l]) || {};
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    var k = el.getAttribute("data-i18n");
+    if (dict[k] != null) el.textContent = dict[k];
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+    var k = el.getAttribute("data-i18n-html");
+    if (dict[k] != null) el.innerHTML = dict[k];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+    var k = el.getAttribute("data-i18n-placeholder");
+    if (dict[k] != null) el.setAttribute("placeholder", dict[k]);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
+    var k = el.getAttribute("data-i18n-aria");
+    if (dict[k] != null) el.setAttribute("aria-label", dict[k]);
+  });
+  if (window.__dmPaintTheme) window.__dmPaintTheme();
+  if (window.onLangChange) window.onLangChange(l);
+}
+document.querySelectorAll(".lang-toggle button").forEach(function (b) {
+  b.addEventListener("click", function () { dmSetLang(b.getAttribute("data-lang")); });
+});
+
+
+window.I18N = {
+  pt: {
+    tag: "Pomodoro",
+    code: "Código",
+    labnote: "Laboratório, não um produto de produção.",
+    title: "Pomodoro",
+    lead: "Foco 25 minutos, pausa 5. Começa, pausa e recomeça — tudo neste browser.",
+    start: "Começar",
+    pause: "Pausa",
+    reset: "Repor",
+    work: "Foco",
+    brk: "Pausa",
+    sessions: "Sessões concluídas",
+    doneWork: "Sessão concluída. Pausa de 5 minutos.",
+    doneBreak: "Pausa concluída. Nova sessão de foco."
+  },
+  en: {
+    tag: "Pomodoro",
+    code: "Code",
+    labnote: "This is a lab, not a production product.",
+    title: "Pomodoro",
+    lead: "25 minutes of focus, 5 minutes of break. Start, pause, reset — all in this browser.",
+    start: "Start",
+    pause: "Pause",
+    reset: "Reset",
+    work: "Focus",
+    brk: "Break",
+    sessions: "Sessions completed",
+    doneWork: "Session done. 5-minute break.",
+    doneBreak: "Break done. New focus session."
+  }
+};
+
+(function () {
+  var WORK = 25 * 60, BRK = 5 * 60;
+  var remaining = WORK, mode = "work", running = false, tick = null, sessions = 0;
+  var C = 2 * Math.PI * 52;
+  var arc = document.getElementById("arc");
+  arc.style.strokeDasharray = String(C);
+
+  function t(k) {
+    var l = dmGetLang();
+    return (I18N[l] && I18N[l][k]) || I18N.pt[k] || k;
+  }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function total() { return mode === "work" ? WORK : BRK; }
+  function paint() {
+    var m = Math.floor(remaining / 60), s = remaining % 60;
+    document.getElementById("time").textContent = pad(m) + ":" + pad(s);
+    document.getElementById("phase").textContent = t(mode === "work" ? "work" : "brk");
+    document.getElementById("meta").textContent = t("sessions") + ": " + sessions;
+    var p = remaining / total();
+    arc.style.strokeDashoffset = String(C * (1 - p));
+    document.title = pad(m) + ":" + pad(s) + " · " + t(mode === "work" ? "work" : "brk") + " · Pomodoro";
+  }
+  window.onLangChange = paint;
+  function chime() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = 880;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+      o.start(); o.stop(ctx.currentTime + 0.42);
+    } catch (e) {}
+  }
+  function step() {
+    if (remaining > 0) { remaining--; paint(); return; }
+    chime();
+    if (mode === "work") { sessions++; mode = "break"; remaining = BRK; }
+    else { mode = "work"; remaining = WORK; }
+    paint();
+  }
+  function start() {
+    if (running) return;
+    running = true;
+    tick = setInterval(step, 1000);
+  }
+  function pause() {
+    running = false;
+    if (tick) clearInterval(tick);
+    tick = null;
+  }
+  function reset() {
+    pause();
+    remaining = total();
+    paint();
+  }
+  document.getElementById("start").addEventListener("click", start);
+  document.getElementById("pause").addEventListener("click", pause);
+  document.getElementById("reset").addEventListener("click", reset);
+  paint();
+})();
+
+    dmSetLang(dmGetLang());
+  </script>
+</body>
+</html>
