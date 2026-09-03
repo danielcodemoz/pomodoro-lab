@@ -1,9 +1,19 @@
 # Pomodoro
 
-Temporizador Pomodoro 25/5 com começar, pausa e repor. Pomodoro 25/5 timer with start, pause and reset.
+Temporizador Pomodoro 25/5 no browser, com começar, pausa e repor. Interface em português e inglês.
 
-**Ao vivo / Live:** https://danielcodemoz.github.io/pomodoro-lab/
+**Demo:** https://danielcodemoz.github.io/pomodoro-lab/
 
-Portfólio: https://danielpro.dev
+## Stack
 
-Isto é um laboratório, não um produto de produção. This is a lab, not a production product.
+- HTML, CSS e JavaScript (`index.html`)
+
+## Correr localmente
+
+Abre `index.html` no browser.
+
+## Autor
+
+Daniel Marcos — consultor de TI em Maputo. Lab público, não é produto de cliente.
+
+https://danielpro.dev
